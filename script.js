@@ -3,6 +3,7 @@ let menuItems = [];
 let categories = [];
 let cart = [];
 
+
 // Selecting elements from the DOM
 const categoriesContainer = document.getElementById('categories');
 const menuItemsContainer = document.getElementById('menu-items');
@@ -32,22 +33,47 @@ async function fetchData(action, params = {}) {
     }
 }
 
-// Function to fetch images from Pixabay API
-async function fetchImages(query) {
-    const PIXABAY_API_KEY = '31978500-acfdf65a0f0419c5bdf14f0b2'; // Replace with your actual Pixabay API key
-    try {
-        const response = await fetch(`https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(query)}&image_type=photo`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        const data = await response.json();
-        return data.hits;
-    } catch (error) {
-        console.error('Error fetching images:', error);
-        return [];
-    }
+// Function to search items
+async function searchItems(query) {
+    return await fetchData('search', { query });
 }
 
+
+// Function to fetch the API key
+async function fetchApiKey() {
+    try {
+      const response = await fetch('get_api_key.php');
+      if (!response.ok) {
+        throw new Error('Failed to fetch API key');
+      }
+      const data = await response.json();
+      return data.apiKey;
+    } catch (error) {
+    //   console.error('Error fetching API key:', error);
+      throw error; // rethrow the error to handle it elsewhere if needed
+    }
+  }
+  
+  // Function to fetch images from Pixabay API
+  async function fetchImages(query) {
+    try {
+      const apiKey = await fetchApiKey();
+      const response = await fetch(`https://pixabay.com/api/?key=${apiKey}&q=${encodeURIComponent(query)}&image_type=photo`);
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      return data.hits;
+    } catch (error) {
+      console.error('Error fetching images:', error);
+      return []; // return empty array on error
+    }
+  }
+  
+
+  
 // Load menu items from PHP backend and fetch images
 async function loadMenuItems(category = 'all') {
     menuItemsContainer.innerHTML = '<div class="loading">Loading menu items...</div>';
@@ -79,6 +105,19 @@ async function loadCategories() {
     categories = await fetchData('categories');
     categoriesContainer.innerHTML = '';
     
+    // Add "All" category
+    const allCategoryElement = document.createElement('div');
+    allCategoryElement.className = 'category active';
+    allCategoryElement.setAttribute('data-category', 'all');
+    allCategoryElement.innerHTML = `
+        <div class="category-image">
+            <img src="https://www.bitesbee.com/wp-content/uploads/2021/09/banner-3.jpg" alt="All Categories" loading="lazy">
+
+        </div>
+        <span>All Categories</span>
+    `;
+    categoriesContainer.appendChild(allCategoryElement);
+    
     for (let category of categories) {
         let images = await fetchImages(category.name);
         let imageUrl = images.length > 0 ? images[0].webformatURL : 'https://via.placeholder.com/100';
@@ -95,10 +134,6 @@ async function loadCategories() {
         `;
         
         categoriesContainer.appendChild(categoryElement);
-    }
-    
-    if (categories.length > 0) {
-        categoriesContainer.firstChild.classList.add('active');
     }
 }
 
@@ -187,41 +222,6 @@ function debounce(func, delay) {
     };
 }
 
-// Function to display search results in explore grid
-async function displaySearchResults(query) {
-    exploreGrid.innerHTML = '<div class="loading">Searching...</div>';
-
-    try {
-        const menuItems = await fetchData('search', { query });
-        exploreGrid.innerHTML = '';
-
-        if (menuItems.length === 0) {
-            exploreGrid.innerHTML = '<div class="no-results">No results found</div>';
-            return;
-        }
-
-        for (let item of menuItems) {
-            let images = await fetchImages(item.name);
-            let imageUrl = images.length > 0 ? images[0].webformatURL : 'https://via.placeholder.com/300';
-
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.innerHTML = `
-                <img src="${imageUrl}" alt="${item.name}" loading="lazy">
-                <div class="card-info">
-                    <h3>${item.name}</h3>
-                    <p>$${parseFloat(item.price).toFixed(2)}</p>
-                    <button class="add-to-cart-btn" data-id="${item.id}">Add to Cart</button>
-                </div>
-            `;
-            exploreGrid.appendChild(card);
-        }
-    } catch (error) {
-        console.error('Error displaying search results:', error);
-        exploreGrid.innerHTML = '<div class="error">An error occurred while searching. Please try again.</div>';
-    }
-}
-
 // Event listeners
 document.addEventListener('click', (e) => {
     if (e.target.classList.contains('add-to-cart-btn')) {
@@ -251,9 +251,10 @@ document.addEventListener('click', (e) => {
     }
 
     if (e.target.closest('.category')) {
-        const category = e.target.closest('.category').getAttribute('data-category');
+        const categoryElement = e.target.closest('.category');
+        const category = categoryElement.getAttribute('data-category');
         document.querySelectorAll('.category').forEach(cat => cat.classList.remove('active'));
-        e.target.closest('.category').classList.add('active');
+        categoryElement.classList.add('active');
         loadMenuItems(category);
     }
 
@@ -287,11 +288,110 @@ searchInput.addEventListener('input', debounce(function() {
     }
 }, 300));
 
-// Initialize app
+// Function to display search results (placeholder - implement as needed)
+async function displaySearchResults(query) {
+    // Implement search functionality here
+    console.log(`Searching for: ${query}`);
+    // You might want to fetch search results from the server and display them in the exploreGrid
+}
+
+
+
+
+// ... (keep existing code)
+
+// Function to fetch random images from Pixabay
+async function fetchRandomImages(count = 20) {
+    const apiKey = await fetchApiKey();
+    
+    try {
+        const response = await fetch(`https://pixabay.com/api/?key=${apiKey}&q=food&per_page=${count}`);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const data = await response.json();
+        return data.hits;
+    } catch (error) {
+        console.error('Error fetching random images:', error);
+        return [];
+    }
+}
+
+// Function to display random images in the explore grid
+async function displayRandomImages() {
+    exploreGrid.innerHTML = '<div class="loading">Loading images...</div>';
+    const images = await fetchRandomImages();
+    exploreGrid.innerHTML = '';
+
+    images.forEach(image => {
+        const imageElement = document.createElement('div');
+        imageElement.className = 'explore-item';
+        imageElement.innerHTML = `
+            <div class="explore-item-image">
+                <img src="${image.webformatURL}" alt="${image.tags}" loading="lazy">
+            </div>
+        `;
+        exploreGrid.appendChild(imageElement);
+    });
+}
+
+// Function to display search results in Instagram-like format
+async function displaySearchResults(query) {
+    exploreGrid.innerHTML = '<div class="loading">Searching...</div>';
+    const results = await searchItems(query);
+    exploreGrid.innerHTML = '';
+
+    if (results.length === 0) {
+        exploreGrid.innerHTML = '<div class="no-results">No results found</div>';
+        return;
+    }
+
+    for (let item of results) {
+        let images = await fetchImages(item.search_term || item.name);
+        let imageUrl = images.length > 0 ? images[0].webformatURL : 'https://via.placeholder.com/300';
+        
+        const itemElement = document.createElement('div');
+        itemElement.className = 'explore-item';
+        itemElement.innerHTML = `
+            <div class="explore-item-image">
+                <img src="${imageUrl}" alt="${item.name}" loading="lazy">
+            </div>
+            <div class="explore-item-details">
+                ${item.type === 'menu_item' ? `
+                ` : ''}
+                
+            </div>
+        `;
+        exploreGrid.appendChild(itemElement);
+    }
+}
+
+
+// Update the debounced search event listener
+searchInput.addEventListener('input', debounce(function() {
+    const query = this.value.trim();
+    if (query.length > 0) {
+        displaySearchResults(query);
+    } else {
+        displayRandomImages();
+    }
+}, 300));
+
+// Initialize explore tab with random images
+function initExploreTab() {
+    displayRandomImages();
+}
+
+// Update the init function to initialize the explore tab
 async function init() {
     await loadCategories();
-    await loadMenuItems();
+    await loadMenuItems('all');
     updateCart();
+    initExploreTab();
 }
+
+// ... (keep the rest of the existing code)
+
+
 
 init();

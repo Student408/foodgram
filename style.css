@@ -74,7 +74,7 @@ body::-webkit-scrollbar {
     border-radius: 10px;
     padding: 8px 16px;
     margin: 16px;
-    margin-top: -2px;
+    margin-top: 2px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -90,6 +90,94 @@ body::-webkit-scrollbar {
     outline: none;
 }
 
+
+
+/* ... (keep existing styles) */
+
+.explore-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 15px;
+}
+
+.explore-item {
+    background-color: #ffffff;
+    border: 1px solid #dbdbdb;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.explore-item-image {
+    width: 100%;
+    height: 250px;
+    overflow: hidden;
+}
+
+.explore-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.explore-item-details {
+    padding: 12px;
+}
+
+.explore-item-name {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.explore-item-price {
+    color: #4CAF50;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.explore-item-type {
+    font-size: 0.8em;
+    color: #777;
+    margin-top: 5px;
+}
+
+.add-to-cart-btn {
+    background-color: #0095f6;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.add-to-cart-btn:hover {
+    background-color: #0081d6;
+}
+
+.loading, .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+    color: #777;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .explore-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    .explore-item-image {
+        height: 150px;
+    }
+}
+
+
+
+
 /* Hide the scrollbar */
 nav::-webkit-scrollbar {
     width: 0;
@@ -100,7 +188,7 @@ nav::-webkit-scrollbar {
     display: flex;
     justify-content: space-around;
     padding: 12px 0;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--card-background);
     backdrop-filter: blur(10px);
     position: fixed;
     bottom: 0;
@@ -132,8 +220,8 @@ nav::-webkit-scrollbar {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
     gap: 16px;
+    padding: 2px 16px;
     
-    padding: 16px;
 }
 
 .menu-item {
@@ -141,7 +229,6 @@ nav::-webkit-scrollbar {
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
 
 .menu-item-image {
     position: relative;
@@ -160,12 +247,14 @@ nav::-webkit-scrollbar {
 }
 
 .menu-item-details {
-    padding: 12px;
+    padding: 8px 12px;
+   
+}
 }
 
 .menu-item-name {
     font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     color: var(--text-color);
 }
 
@@ -174,27 +263,13 @@ nav::-webkit-scrollbar {
     color: var(--secondary-text-color);
 }
 
-.add-to-cart-btn {
-    background-color: var(--primary-color);
-    color: var(--card-background);
-    border: none;
-    border-radius: 20px;
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    margin-top: 8px;
-    width: 100%;
-}
+
 
 /* Categories styles */
 .categories {
     display: flex;
     overflow-x: auto;
-    padding-left: 16px;
-    padding-right: 16px;
-    padding-bottom: 2px;
-    padding-top: 2px;
+    padding: 2px 16px;
     gap: 16px;
 }
 
@@ -220,7 +295,7 @@ nav::-webkit-scrollbar {
 }
 
 .category.active .category-image {
-    box-shadow: 0 0 0 2px var(--primary-color);
+    box-shadow: 0 0 0 2.2px var(--primary-color);
 }
 
 .category span {
@@ -342,7 +417,7 @@ nav::-webkit-scrollbar {
 /* Tab content styles */
 .tab-content {
     display: none;
-    padding: 16px;
+    padding: 0px;
 }
 
 .tab-content.active {
@@ -458,11 +533,12 @@ h2 {
     background-color: #0071e3;
     color: #fff;
     border: none;
-    border-radius: 5px;
+    border-radius: 16px;
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-top: auto;
+    margin-top: 8px;
+    margin-bottom: 6px;
 }
 
 .add-to-cart-btn:hover {
